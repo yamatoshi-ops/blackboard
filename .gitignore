@@ -1,0 +1,41 @@
+.claude/*
+!.claude/skills/
+# 評価ワークスペースはコミットしない
+.claude/skills/*-workspace/
+
+# macOS
+.DS_Store
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.venv/
+venv/
+
+# Node/JS
+node_modules/
+
+# Jupyter
+.ipynb_checkpoints/
+
+# その他よくある生成物
+dist/
+*.spec
+
+# Build artifacts
+build/
+
+
+
+# IDE / Editor
+.vscode/
+.idea/
+
+.obsidian/
+
+.serkey
+.env
+
+.cache
