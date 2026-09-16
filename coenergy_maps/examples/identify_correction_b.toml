@@ -1,0 +1,11 @@
+schema_version = 1
+[input]
+csv = "motor_b_correction_vi.csv"
+format = "jmag_vi"
+[output]
+directory = "../output/correction_b"
+[motor]
+name = "synthetic_motor_b_correction"
+pole_pairs = 7
+dq_convention = "power_invariant"
+stator_resistance_ohm = 0.12

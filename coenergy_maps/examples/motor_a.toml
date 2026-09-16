@@ -1,0 +1,30 @@
+schema_version = 1
+
+[input]
+csv = "motor_a_vi.csv"
+format = "jmag_vi"
+encoding = "utf-8-sig"
+
+[output]
+directory = "../output/motor_a"
+
+[motor]
+name = "synthetic_motor_a"
+pole_pairs = 3
+dq_convention = "power_invariant"
+stator_resistance_ohm = 0.04
+temperature_degC = 25.0
+stator_resistance_temperature_degC = 25.0
+
+[fit]
+selection = "explicit"
+i_base_A = 100.0
+psi_base_Wb = 0.12
+u_breakpoints = [-1.0, -0.5, 0.0, 0.5, 1.0]
+v_breakpoints = [0.0, 0.25, 0.5, 0.75, 1.0]
+roughness_weight = 0.0
+ridge_weight = 0.0
+solver = "dense_gelsd"
+active_basis_tolerance = 1e-14
+rank_tolerance = 1e-12
+quadrature_order = 4

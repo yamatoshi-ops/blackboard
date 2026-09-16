@@ -1,0 +1,39 @@
+schema_version = 1
+[input]
+prior_model = "../output/motor_a/prior_model.npz"
+prior_settings = "../output/motor_a/prior_settings.json"
+prior_samples = "../output/motor_a/jmag_flux_samples.csv"
+flux_samples = "../output/correction_a/flux_samples.csv"
+[output]
+directory = "../output/maps_a"
+
+[correction.fit]
+selection = "explicit"
+i_base_A = 100.0
+psi_base_Wb = 0.12
+u_breakpoints = [-1.0, 0.0, 1.0]
+v_breakpoints = [0.0, 0.5, 1.0]
+roughness_weight = 0.0
+ridge_weight = 0.0
+solver = "dense_gelsd"
+active_basis_tolerance = 1e-14
+rank_tolerance = 1e-12
+quadrature_order = 4
+
+[correction.support]
+id_outer_A = [-95.0, 95.0]
+id_core_A = [-70.0, 70.0]
+iq_outer_abs_A = [0.0, 95.0]
+iq_core_abs_A = [0.0, 70.0]
+reference_id_A = 0.0
+reference_iq_A = 0.0
+
+[forward]
+id_axis_A = [-100.0, -91.666666667, -83.333333333, -75.0, -66.666666667, -58.333333333, -50.0, -41.666666667, -33.333333333, -25.0, -16.666666667, -8.333333333, 0.0, 8.333333333, 16.666666667, 25.0, 33.333333333, 41.666666667, 50.0, 58.333333333, 66.666666667, 75.0, 83.333333333, 91.666666667, 100.0]
+iq_axis_A = [0.0, 6.25, 12.5, 18.75, 25.0, 31.25, 37.5, 43.75, 50.0, 56.25, 62.5, 68.75, 75.0, 81.25, 87.5, 93.75, 100.0]
+
+[inverse]
+psi_d_axis_Wb = [0.042, 0.04508, 0.04816, 0.05124, 0.05432, 0.0574, 0.06048, 0.06356, 0.06664, 0.06972, 0.0728, 0.07588, 0.07896, 0.08204, 0.08512, 0.0882, 0.09128, 0.09436, 0.09744, 0.10052, 0.1036, 0.10668, 0.10976, 0.11284, 0.11592, 0.119, 0.12208, 0.12516, 0.12824, 0.13132, 0.1344]
+psi_q_axis_Wb = [0.0, 0.0034, 0.0068, 0.0102, 0.0136, 0.017, 0.0204, 0.0238, 0.0272, 0.0306, 0.034, 0.0374, 0.0408, 0.0442, 0.0476, 0.051, 0.0544, 0.0578, 0.0612, 0.0646, 0.068, 0.0714, 0.0748, 0.0782, 0.0816, 0.085, 0.0884, 0.0918, 0.0952, 0.0986, 0.102]
+smoothing_d = 0.0
+smoothing_q = 0.0

@@ -1,0 +1,58 @@
+# Normalize line endings on commit; checkout text files with LF.
+* text=auto eol=lf
+
+# Source code
+*.rs            text eol=lf
+*.cpp           text eol=lf
+*.cc            text eol=lf
+*.c             text eol=lf
+*.h             text eol=lf
+*.hpp           text eol=lf
+*.py            text eol=lf
+*.ipynb         text eol=lf
+
+# Build / config
+*.toml          text eol=lf
+*.lock          text eol=lf
+*.cmake         text eol=lf
+CMakeLists.txt  text eol=lf
+Makefile        text eol=lf
+*.mk            text eol=lf
+*.yml           text eol=lf
+*.yaml          text eol=lf
+*.json          text eol=lf
+
+# Docs / data (text)
+*.md            text eol=lf
+*.txt           text eol=lf
+*.csv           text eol=lf
+*.tsv           text eol=lf
+
+# Windows-only scripts keep CRLF
+*.bat           text eol=crlf
+*.cmd           text eol=crlf
+*.ps1           text eol=crlf
+
+# Shell scripts always LF
+*.sh            text eol=lf
+
+# Binary assets
+*.png           binary
+*.jpg           binary
+*.jpeg          binary
+*.gif           binary
+*.bmp           binary
+*.ico           binary
+*.pdf           binary
+*.zip           binary
+*.gz            binary
+*.tar           binary
+*.7z            binary
+*.exe           binary
+*.dll           binary
+*.so            binary
+*.dylib         binary
+*.lib           binary
+*.a            binary
+*.obj           binary
+*.parquet       binary

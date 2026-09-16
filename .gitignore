@@ -27,7 +27,15 @@ dist/
 # Build artifacts
 build/
 
-
+# Motor simulation generated waveform runs
+motor_simulation_base/simulation/results/waveforms/
+motor_simulation_base/simulation/results/sweeps/
+motor_simulation_base/simulation/results/inv_custom*.csv
+motor_simulation_base/simulation/results/plots/inv_custom*.png
+motor_simulation_base/simulation/results/plant_phase7-c-pi-custom_*.csv
+motor_simulation_base/simulation/results/plant_phase7-c-pi-custom_*.parquet
+motor_simulation_base/simulation/results/rust/plant_phase7-c-pi-custom_*.csv
+motor_simulation_base/simulation/results/rust/plant_phase7-c-pi-custom_*.parquet
 
 # IDE / Editor
 .vscode/
@@ -39,3 +47,27 @@ build/
 .env
 
 .cache
+
+motulator-main/
+
+# 参考論文PDF（git管理外。書誌は features/mvp/plan/plan_capless_ipmsm_diy.md §13 に記録）
+features/mvp/plan/*.pdf
+# 参考論文PDF（git管理外。書誌は features/MTFrame/memo.md に記録）
+features/MTFrame/*.pdf
+# 参考特許PDF（git管理外。書誌は features/overmodulation-control/design/synchronized_pwm_survey.md URL節に記録）
+features/overmodulation-control/reference/
+
+# ChatGPT memo
+features/calibration/chatgpt_memo/
+
+# Removed from version control; local motor_model assets are retained
+/features/motor_model/
+
+# Calibration experiment workspace (keep the directory only)
+features/calibration/.workspace/*
+!features/calibration/.workspace/.gitkeep
+
+# Local agent workspace and notes
+/.serena/
+/_memo/
+/rules/jp/

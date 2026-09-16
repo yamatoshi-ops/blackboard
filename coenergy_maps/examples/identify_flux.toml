@@ -1,0 +1,16 @@
+schema_version = 1
+
+[input]
+csv = "motor_a_vi.csv"
+format = "jmag_vi"
+
+[output]
+directory = "../output/flux_samples"
+
+[motor]
+name = "synthetic_motor_a"
+pole_pairs = 3
+dq_convention = "power_invariant"
+stator_resistance_ohm = 0.04
+temperature_degC = 25.0
+stator_resistance_temperature_degC = 25.0
