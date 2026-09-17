@@ -493,3 +493,214 @@ $$
 [3]: https://www.researchgate.net/publication/50378518_Estimation_of_Saturation_of_Permanent-Magnet_Synchronous_Motors_Throughan_Energy-Based_Model?utm_source=chatgpt.com "(PDF) Estimation of Saturation of Permanent-Magnet Synchronous Motors Through an Energy-Based Model"
 [4]: https://cris.unibo.it/handle/11585/1043746?utm_source=chatgpt.com "Variable-Temperature PMSM Dynamic Model Based on Spline Interpolation of Coenergy Map"
 [5]: https://www.researchgate.net/publication/261136936_Energy-based_modeling_of_electric_motors?utm_source=chatgpt.com "(PDF) Energy-based modeling of electric motors"
+---
+はい。目的が **トルクに対応する \(P'\) の観測**なら、次の構成が考えられます。
+
+> **実測電流と共エネルギーモデルから \(P'\) を算出し、Qは磁気特性の変化を補正するために使う。**  
+> \(P'_{\mathrm{ref}}(T,N,V)\) は、その観測結果と比較する目標値にする。
+
+この場合の「免疫」は、ばらつきによって実際のトルクが変わったときにも、**推定値が実際の \(P'\) を正しく追えること**と捉えます。
+
+## 1. \(P'\) の定義をそろえる
+
+ご提示の
+
+\[
+P'=P-P_{\mathrm{cu}}
+\]
+
+を維持する場合、定常運転で、\(T\) が軸出力トルクなら、
+
+\[
+P'=\omega_m T+P_{\mathrm{銅損以外}}
+,\qquad
+\omega_m=\frac{2\pi N}{60}
+\]
+
+です。銅損以外には、鉄損や機械損などが入ります。したがって、これらを無視できる場合の \(K\) は \(\omega_m\) です。[損失を含むPMSMモデル](https://www.mathworks.com/help/sps/ref/femparameterizedpmsm.html)
+
+提案されたマップは、例えば、
+
+\[
+\boxed{
+P'_{\mathrm{ref}}
+=f(T_{\mathrm{ref}},N,V_{\mathrm{dc}})
+=\omega_mT_{\mathrm{ref}}
++P_{\mathrm{銅損以外,Typ}}
+}
+\]
+
+という位置づけにできます。DC電圧による弱め界磁の運転点や損失の違いも、固定した制御・PWM条件の下でマップへ含められます。
+
+ただし、**このマップは必要電力を示すもので、現在そのトルクが出ていることを示す観測値ではありません。**
+
+## 2. モデルA：実測電流＋固定の共エネルギーマップ
+
+まず比較の基準にしたいのが、この構成です。
+
+共エネルギーを \(W'_m(i_d,i_q)\) として、
+
+\[
+\lambda_d=\frac{\partial W'_m}{\partial i_d},
+\qquad
+\lambda_q=\frac{\partial W'_m}{\partial i_q}
+\]
+
+から磁束を求めます。基本波の電力不変dqモデルでは、磁気変換電力は、
+
+\[
+\boxed{
+\hat P_{\mathrm{em}}
+=\omega_e
+\left(
+i_q\frac{\partial W'_m}{\partial i_d}
+-i_d\frac{\partial W'_m}{\partial i_q}
+\right)
+}
+\]
+
+です。エネルギー関数から磁束とトルクを整合して求める考え方です。[エネルギーに基づくモータモデル](https://arxiv.org/html/1609.08050v1)
+
+この式へ**指令電流ではなく実測電流**を入れます。
+
+すると、磁気モデルが正しければ、
+
+- \(R_s\) の変化で電流応答が変わる
+- デッドタイムや電圧指令誤差で実電流がずれる
+- DC電圧が変わり、運転電流点が変わる
+
+といった影響を、実測電流を通して捉えられます。**推定計算には、電圧指令や \(R_s\) を直接使いません。**
+
+一方、磁石温度などで磁気特性そのものが変わると、固定マップに誤差が生じます。そこを補うのが次のモデルです。
+
+※上式は保存的な磁気系の式です。鉄損を含む \(P-P_{\mathrm{cu}}\) を出力するには、鉄損枝と電流の定義を整合させた別の損失モデルが必要です。
+
+## 3. モデルB：Qで補正する「共エネルギーTyp＋Δ」
+
+例えば、磁気特性の変化を一つの状態 \(\theta\) で表します。
+
+\[
+W'_m(i_d,i_q,\theta)
+=
+W'_{\mathrm{Typ}}(i_d,i_q)
++\theta\,\Phi(i_d,i_q)
+\]
+
+- \(W'_{\mathrm{Typ}}\)：基準の磁気特性
+- \(\Phi\)：磁石強度などが変わったときの変化パターン
+- \(\theta\)：現在の変化量
+
+\[
+b_d=\frac{\partial\Phi}{\partial i_d},
+\qquad
+b_q=\frac{\partial\Phi}{\partial i_q}
+\]
+
+とすれば、
+
+\[
+\hat{\boldsymbol\lambda}
+=\boldsymbol\lambda_{\mathrm{Typ}}
++\boldsymbol b\,\hat\theta
+\]
+
+です。
+
+### Q側で推定する量
+
+まず鉄損・過渡項を省いた準定常モデルでは、
+
+\[
+y_Q=
+\frac{Q_{\mathrm{obs}}}{\omega_e}
+-i_d\lambda_{d,\mathrm{Typ}}
+-i_q\lambda_{q,\mathrm{Typ}}
+=
+\underbrace{(i_db_d+i_qb_q)}_{h_Q}\theta+\nu
+\]
+
+となります。これに、ゆっくり変化する状態モデル
+
+\[
+\theta_{k+1}=\theta_k+w_k
+\]
+
+を組み合わせれば、1状態KFを構成できます。
+
+### 観測したい電力を出力する
+
+同じ状態から、
+
+\[
+\boxed{
+\hat P_{\mathrm{em}}
+=
+P_{\mathrm{em,Typ}}
++
+\underbrace{\omega_e(i_qb_d-i_db_q)}_{c_P}\hat\theta
+}
+\]
+
+を出します。
+
+**Qで得た情報を、既知の磁気変化パターンを介して、必要な電力補正へ変換するモデルです。**  
+Rs同定を必須の中間工程にせず、電力を出力できます。
+
+## 4. \(P'_{\mathrm{ref}}\) マップとの接続
+
+構成は次のようになります。
+
+```mermaid
+flowchart LR
+  A["実測電流・回転数"] --> B["共エネルギー Typ＋Δ"]
+  C["電圧・電流からQを算出"] --> D["磁気差分の推定"]
+  D --> B
+  B --> E["磁気変換電力・損失モデル"]
+  E --> F["P′の推定値"]
+  G["トルク指令・回転数・DC電圧"] --> H["P′refマップ"]
+  H --> I["目標電力との差"]
+  F --> I
+```
+
+比較する量は、
+
+\[
+e_{P'}=P'_{\mathrm{ref}}-\hat P'
+\]
+
+です。これを後段のトルク補正判断へ使えます。
+
+ここで、\(P'_{\mathrm{ref}}\) を「実際の電力」としてKFへ強く与えると、実トルクが不足していても推定値だけが目標へ近づく可能性があります。**目標値と観測値を分けることが、この構成の要点です。**
+
+## 5. どのばらつきに強くできるか
+
+| ばらつき | この構成での扱い |
+|---|---|
+| \(R_s\) の温度変化 | 磁気変換電力の算出式にRsを直接使わない。Qでも抵抗項は相殺 |
+| 電圧誤差による実電流の変化 | 実測電流から、その結果生じた電力変化を捉える |
+| 磁石強度・温度による磁気変化 | 用意した \(\Phi\) で表せて、Qに感度があれば補正できる可能性 |
+| 電流と平行な電圧誤差 | Qで相殺。ただし実際のデッドタイムの全成分が相殺されるとは限らない |
+| DCリンク電圧の尺度誤差 | Qへ混入するため、磁気差分との識別が必要 |
+| 電流センサ・角度誤差 | Qと磁気モデルの両方へ影響する |
+| 鉄損変化・表現範囲外の個体差 | 別モデル、追加情報、または残留誤差として扱う |
+
+特に、Qを使った補正には**電圧誤差を磁気変化と誤認する経路**が加わります。固定WモデルにQ補正を加えれば必ず強くなる、とは言えません。
+
+今回の目的に直結する指標は、Qの残差だけでなく、
+
+\[
+\delta\hat P_{\mathrm{em}}
+\approx
+\frac{c_P}{h_Q}\,\delta E_Q
+\]
+
+という**Qの誤差が電力へ何倍で伝わるか**です。Qの感度が小さく、電力の感度が大きい運転点は不利になります。
+
+---
+
+**試作2の候補としては、次の二つを同じ \(P'_{\mathrm{ref}}\) に対して比較する構成が適切だと考えます。**
+
+1. **固定W＋実測電流で \(P'\) を推定**
+2. **QでWの磁気差分を補正して \(P'\) を推定**
+
+これにより、Qによる適応が磁気変化への追従に役立つ範囲と、電圧誤差を取り込んで悪化する範囲を区別できます。必要な事前情報は、\(P'_{\mathrm{ref}}\) に加えて、**基準磁気モデルと、適応させたい変化のパターン**です。
